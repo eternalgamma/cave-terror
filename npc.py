@@ -17,4 +17,10 @@ class Trader(NonPlayableCharacter):
                        items.CrustyBread(),
                        items.CrustyBread(),
                        items.HealingPotion(),
+                       items.HealingPotion(),
                        items.HealingPotion()]
+
+class GambleDemon(NonPlayableCharacter):
+    def __init__(self):
+        self.name = "Gambler Demon"
+        self.gold = 100

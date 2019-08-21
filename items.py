@@ -27,6 +27,13 @@ class RustySword(Weapon):
         self.damage = 20
         self.value = 100
 
+class Axe(Weapon):
+    def __init__(self):
+        self.name = "Axe"
+        self.description = "This axe seems to have been forged long ago, but somehow still remains intact."
+        self.damage = 50
+        self.value = 200
+
 class Consumable:
     def __init__(self):
         raise NotImplementedError("Do not create raw Consumable objects.")

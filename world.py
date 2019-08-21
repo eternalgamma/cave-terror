@@ -1,4 +1,4 @@
-import random, enemies, npc
+import random, enemies, npc, items, player
 
 class MapTile:
     def __init__(self, x, y):
@@ -19,6 +19,29 @@ class StartTile(MapTile):
         You can make out four paths, each equally as dark
         and foreboding.
         """
+###Boss Tile###
+class BossTile(MapTile):
+    def __init__(self, x, y):
+        self.enemy = enemies.AbyssalDemon()
+        self.alive_text = "The door slams shut behind you, and you " \
+                          "hear a low rumbling sound. Out of the darkness, " \
+                          "you see the glow of a long whip engulfed in flames. " \
+                          "It's the abyssal demon!"
+        self.dead_text = "The remains of the abyssal demon lie in a pile of ashes on the ground. You may just want to keep going forward..."
+        super().__init__(x, y)
+    
+    def intro_text(self):
+        if self.enemy.is_alive():
+            text = self.alive_text
+        else:
+            text = self.dead_text
+        return text
+
+    def modify_player(self,player):
+        if self.enemy.is_alive():
+            player.hp = player.hp - self.enemy.damage
+            print("Abyssal Demon does {} damage. You have {} HP remaining.".format(self.enemy.damage, player.hp))
+
 
 class EnemyTile(MapTile): # Needs to match the list in enemies.py
     def __init__(self, x, y):
@@ -45,12 +68,13 @@ class EnemyTile(MapTile): # Needs to match the list in enemies.py
                              "into an ordinary rock."
 
         super().__init__(x, y)
-    
+
+
     def intro_text(self):
         if self.enemy.is_alive():
             text = self.alive_text
         else:
-            self.dead_text
+            text = self.dead_text
         return text
 
     def modify_player(self,player):
@@ -58,11 +82,36 @@ class EnemyTile(MapTile): # Needs to match the list in enemies.py
             player.hp = player.hp - self.enemy.damage
             print("Enemy does {} damage. You have {} HP remaining.".format(self.enemy.damage, player.hp))
 
+    #def intro_text(self):
+    #    if self.enemy.is_alive():
+    #        return "A {} awaits!".format(self.enemy.name)
+    #    else:
+    #        return "You've defeated the {}.".format(self.enemy.name)
+
+#The below code WORKS. This will create a chest tile "CT" on the map.
+#After the chest tile is created, it will add a Rusty Sword to the player's inventory. There is no randomness to the choice here.
+#Works as of 08/18/18.
+class SwordChest(MapTile):
+    def __init__(self, x, y):
+        self.item = items.RustySword()
+        self.item_claimed = False
+        super().__init__(x, y)
+
+    def modify_player(self, player):
+        if not self.item_claimed:
+            self.item_claimed = True
+            player.inventory.append(items.RustySword()) #Add to the list player.inventory using list.append(item)
+            print("{} added to inventory.".format(self.item))
+
     def intro_text(self):
-        if self.enemy.is_alive():
-            return "A {} awaits!".format(self.enemy.name)
+        if self.item_claimed:
+            return """
+            You have already claimed the item from the chest in this room. Press onwards!
+            """
         else:
-            return "You've defeated the {}.".format(self.enemy.name)
+            return """
+            You open the chest in the middle of the room...
+            """
 
 class FindGoldTile(MapTile):
     def __init__(self, x, y):
@@ -86,6 +135,69 @@ class FindGoldTile(MapTile):
             Someone dropped some gold. You pick it up.
             """
 
+###Gamble Demon Tile### 
+class GambleTile(MapTile):
+    def __init__(self, x, y):
+        self.gambler = npc.GambleDemon()
+        self.gold = 100
+        self.gambled = False
+        super().__init__(x, y)
+
+    def gamble(self, player):
+        r = random.random()
+        if not self.gambled:
+            user_input = input("Would you play to gamble? It costs 100 gold to play, but you could double your wager [y/n]: ")
+            if user_input in ['y', 'Y']:
+                if player.gold >= 100:
+                    if r < 0.50:
+                        player.gold = player.gold + self.gold
+                        self.gambler.gold = self.gambler.gold - 100
+                        print("You beat the gambling demon! {} gold added!".format(self.gold))
+                    else:
+                        player.gold = player.gold - 100
+                        print("Ouch! You lost to the gambling demon. {} gold removed.".format(self.gold))
+                    self.gambled = True
+                else:
+                    print("You don't have enough gold to gamble! Get outta here!")  
+        else:
+            return
+        
+    def intro_text(self):
+        if not self.gambled:
+            return """
+            You notice a strange looking creature sitting in the corner of the room. He's got a menacing smile on his face,
+            but seems to be harmless...
+
+            """
+        else:
+            return """
+            The gambling demon doesn't seem to be here anymore...
+            """
+
+class AxeChest(MapTile):
+    def __init__(self, x, y):
+        self.item = items.RustySword()
+        self.item_claimed = False
+        super().__init__(x, y)
+
+    def modify_player(self, player):
+        if not self.item_claimed:
+            self.item_claimed = True
+            player.inventory.append(items.RustySword()) #Add to the list player.inventory using list.append(item)
+            print("{} added to inventory.".format(self.item))
+
+    def intro_text(self):
+        if self.item_claimed:
+            return """
+            You have already claimed the item from the chest in this room. Press onwards!
+            """
+        else:
+            return """
+            You open the chest in the middle of the room...
+            """
+
+
+                
 class TraderTile(MapTile):
     def __init__(self, x, y):
         self.trader = npc.Trader()
@@ -150,11 +262,16 @@ class VictoryTile(MapTile):
         Victory is yours!"""
 
 world_dsl = """
-    |EN|EN|VT|EN|EN|
-    |EN|  |  |  |EN|
-    |EN|FG|EN|  |TT|
-    |TT|  |ST|FG|EN|
-    |FG|  |EN|  |FG|
+|EN|EN|FG|EN|EN|  |  |VT|  |  |
+|EN|GT|  |  |EN|FG|  |BT|  |  |
+|EN|FG|EN|  |TT|EN|EN|EN|  |GT|
+|TT|  |  |FG|EN|  |  |  |  |EN|
+|FG|  |EN|  |FG|EN|TT|EN|EN|FG|
+|EN|FG|EN|EN|AC|  |FG|  |GT|EN|
+|FG|  |EN|EN|FG|EN|EN|FG|EN|  |
+|  |FG|EN|FG|EN|ST|EN|EN|FG|EN|
+|  |  |  |  |SC|FG|EN|TT|  |  |
+|  |  |GT|EN|EN|EN|  |  |FG|EN|
 """
 def is_dsl_valid(dsl):
     if dsl.count("|ST|") != 1:
@@ -175,6 +292,11 @@ tile_type_dict = {"VT": VictoryTile,
                   "ST": StartTile,
                   "FG": FindGoldTile,
                   "TT": TraderTile,
+                  "SC": SwordChest,
+                  "GT": GambleTile, 
+                  "BT": BossTile,
+                  "AC": AxeChest,
+                  #"RC": RandomChest, #Need to create class
                   "  ": None}
 
 
@@ -192,7 +314,7 @@ def parse_world_dsl():
     for y, dsl_row in enumerate(dsl_lines):
         row = []
         dsl_cells = dsl_row.split("|")
-        dsl_cells = [c for c in dsl_cells if c.strip()]
+        dsl_cells = [c for c in dsl_cells if c]
         for x, dsl_cell in enumerate(dsl_cells):
             tile_type = tile_type_dict[dsl_cell]
             if tile_type == StartTile:

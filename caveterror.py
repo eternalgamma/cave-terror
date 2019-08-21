@@ -1,10 +1,20 @@
+###############################################################################
+# Escape from Cave Terror                                                     #
+# By: Jack Loomis                                                             #
+# Latest Release: v1.1                                                        #
+###############################################################################
 from player import Player
 from collections import OrderedDict
 import world, player
+import pygame
 
+pygame.mixer.init()
+pygame.mixer.music.load("background.mp3")
+pygame.mixer.music.play(-1, 0.0)
 
 def play():
     print("Escape from Cave Terror!")
+    print("version 1.1")
     world.parse_world_dsl()
     player = Player()
     while player.is_alive() and not player.victory:
@@ -14,7 +24,7 @@ def play():
         if player.is_alive() and not player.victory:
             choose_action(room,player)
         elif not player.is_alive():
-            print("Your journey has come to an early end!")
+            print("You have died! R.I.P")
         
     actions = OrderedDict()
     if player.inventory:
@@ -31,6 +41,8 @@ def get_available_actions(room, player):
         action_adder(actions, 't', player.trade, "Trade")
     if isinstance(room, world.EnemyTile) and room.enemy.is_alive():
         action_adder(actions, 'a', player.attack, "Attack")
+    if isinstance(room, world.BossTile) and room.enemy.is_alive():
+        action_adder(actions, 'a', player.attack, "Attack")
     else:
         if world.tile_at(room.x, room.y - 1):
             action_adder(actions, 'n', player.move_north, "Go north")
@@ -42,6 +54,8 @@ def get_available_actions(room, player):
             action_adder(actions, 'w', player.move_west, "Go west")
         if player.hp < 100:
             action_adder(actions, 'h', player.heal, "Heal")
+        if isinstance(room, world.GambleTile):
+            action_adder(actions, 'g', player.gamble, "Gamble")
         
     return actions
 
@@ -60,5 +74,6 @@ def choose_action(room, player):
             action()
         else:
             print("Invalid selection!")
+
 
 play()

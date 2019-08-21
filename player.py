@@ -8,8 +8,8 @@ class Player:
                           items.CrustyBread()]
         self.x = world.start_tile_location[0]
         self.y = world.start_tile_location[1]
-        self.hp = 100
-        self.gold = 5
+        self.hp = 9999999
+        self.gold = 9999999
         self.victory = False
 
     def is_alive(self):
@@ -20,8 +20,7 @@ class Player:
         for item in self.inventory:
             print('* ' + str(item))
         print("Gold: {}".format(self.gold))
-        #best_weapon = self.most_powerful_weapon()
-        #print("Your best weapon is your {}".format(best_weapon))
+        
     def heal(self):
         consumables = [item for item in self.inventory
                        if isinstance(item, items.Consumable)]
@@ -88,3 +87,7 @@ class Player:
     def trade(self):
         room = world.tile_at(self.x, self.y)
         room.check_if_trade(self)
+
+    def gamble(self):
+        room = world.tile_at(self.x, self.y)
+        room.gamble(self)
