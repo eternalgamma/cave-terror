@@ -183,7 +183,7 @@ class AxeChest(MapTile):
     def modify_player(self, player):
         if not self.item_claimed:
             self.item_claimed = True
-            player.inventory.append(items.RustySword()) #Add to the list player.inventory using list.append(item)
+            player.inventory.append(items.Axe()) #Add to the list player.inventory using list.append(item)
             print("{} added to inventory.".format(self.item))
 
     def intro_text(self):
@@ -203,31 +203,6 @@ class TraderTile(MapTile):
         self.trader = npc.Trader()
         super().__init__(x, y)
 
-    def trade(self, buyer, seller):
-        for i, item in enumerate(seller.inventory, 1):
-            print("{}. {} - {} Gold".format(i, item.name, item.value))
-        while True:
-            user_input = input("Choose an item or press Q to exit: ")
-            if user_input in ['Q', 'q']:
-                return
-            else:
-                try:
-                    choice = int(user_input)
-                    to_swap = seller.inventory[choice -1]
-                    self.swap(seller, buyer, to_swap)
-                except ValueError:
-                    print("Invalid choice!")
-
-    def swap(self, seller, buyer, item):
-        if item.value > buyer.gold:
-            print("That's too expensive")
-            return
-        seller.inventory.remove(item)
-        buyer.inventory.append(item)
-        seller.gold = seller.gold + item.value
-        buyer.gold = buyer.gold - item.value
-        print("Trade complete!")
-
     def check_if_trade(self, player):
         while True:
             print("Would you like to (B)uy, (S)ell, or (Q)uit?")
@@ -242,6 +217,39 @@ class TraderTile(MapTile):
                 self.trade(buyer=self.trader, seller=player)
             else:
                 print("Invalid choice!")
+
+    def trade(self, buyer, seller):
+        for i, item in enumerate(seller.inventory, 1):
+            print("{}. {} - {} Gold".format(i, item.name, item.value))
+        while True:
+            user_input = input("Choose an item or press Q to exit: ")
+            if user_input in ['Q', 'q']:
+                return
+            else:
+                try:
+                    choice = int(user_input)
+                    to_swap = seller.inventory[choice -1]
+                    self.swap(seller, buyer, to_swap)
+                except IndexError:
+                    print("Invalid choice!")
+
+
+    def swap(self, seller, buyer, item):
+        if item.value > buyer.gold:
+            print("That's too expensive")
+            return
+        seller.inventory.remove(item)
+        buyer.inventory.append(item)
+        seller.gold = seller.gold + item.value
+        buyer.gold = buyer.gold - item.value
+        print("Trade complete!")
+        for i, item in enumerate(seller.inventory, 1):
+            print("{}. {} - {} Gold".format(i, item.name, item.value))
+
+
+
+
+
 
     def intro_text(self):
         return """
@@ -267,7 +275,7 @@ world_dsl = """
 |EN|FG|EN|  |TT|EN|EN|EN|  |GT|
 |TT|  |  |FG|EN|  |  |  |  |EN|
 |FG|  |EN|  |FG|EN|TT|EN|EN|FG|
-|EN|FG|EN|EN|AC|  |FG|  |GT|EN|
+|EN|AC|EN|EN|EN|  |FG|  |GT|EN|
 |FG|  |EN|EN|FG|EN|EN|FG|EN|  |
 |  |FG|EN|FG|EN|ST|EN|EN|FG|EN|
 |  |  |  |  |SC|FG|EN|TT|  |  |

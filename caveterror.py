@@ -14,7 +14,7 @@ pygame.mixer.music.play(-1, 0.0)
 
 def play():
     print("Escape from Cave Terror!")
-    print("version 1.1")
+    print("version 1.1.1")
     world.parse_world_dsl()
     player = Player()
     while player.is_alive() and not player.victory:
@@ -41,8 +41,9 @@ def get_available_actions(room, player):
         action_adder(actions, 't', player.trade, "Trade")
     if isinstance(room, world.EnemyTile) and room.enemy.is_alive():
         action_adder(actions, 'a', player.attack, "Attack")
-    if isinstance(room, world.BossTile) and room.enemy.is_alive():
+    elif isinstance(room, world.BossTile) and room.enemy.is_alive():
         action_adder(actions, 'a', player.attack, "Attack")
+        action_adder(actions, 'h', player.heal, "Heal") # Allows the player to heal during the boss fight
     else:
         if world.tile_at(room.x, room.y - 1):
             action_adder(actions, 'n', player.move_north, "Go north")

@@ -6,6 +6,7 @@ By: Jack Loomis
 
 Instructions:
 
-- Requires python in order to play
+- This game has been built to an EXE with Pyinstaller. 
 
-- Run python caveterror.py in command prompt from the directory that holds the game files.
+- I am working on implemeting a GUI of sorts to make the game look a little cleaner, but we're just not
+there yet.

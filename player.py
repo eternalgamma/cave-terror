@@ -8,8 +8,8 @@ class Player:
                           items.CrustyBread()]
         self.x = world.start_tile_location[0]
         self.y = world.start_tile_location[1]
-        self.hp = 9999999
-        self.gold = 9999999
+        self.hp = 100
+        self.gold = 50
         self.victory = False
 
     def is_alive(self):
